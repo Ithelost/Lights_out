@@ -12,6 +12,13 @@ public class PlayerMovement : MonoBehaviour {
 
     public float Speed = 1;
     public float Threshold = 0.3f;
+    public GameObject Flashlight;
+    public GameObject Text;
+    private bool facingdown;
+    private bool GadgetOn; 
+    private float timer;
+    private int neededsequence = 3;
+    private int currentsequence = 0;
 
     private Camera _camera;
 
@@ -20,14 +27,48 @@ public class PlayerMovement : MonoBehaviour {
     }
 
 	void FixedUpdate () {
-	    int move = 0;
+        timer += Time.fixedDeltaTime;
 
-	    if (MovementActivator == MovementActivatorType.HeadTilt) {
+        int move = 0;
+        
+        if (MovementActivator == MovementActivatorType.HeadTilt) {
 
 	        var deviceX = Input.acceleration.x;
 	        var deviceY = Input.acceleration.y;
+            Text.GetComponent<Text>().text = currentsequence.ToString() + "/"+neededsequence.ToString();
+            if ((Mathf.Abs(deviceY) < (1-(Threshold))))
+            {
+                if (!facingdown)
+                {
+                    if (timer < 3)
+                    {
+                        currentsequence += 1;
+                        if(currentsequence == neededsequence)
+                        {
+                            Flashlight.SetActive(!Flashlight.active);
+                            currentsequence = 0;
+                        }
 
-	        if (Mathf.Abs(deviceX) > Threshold) {
+                    }
+                    else
+                    {
+                        currentsequence = 1;
+                    }
+                    facingdown = true;
+                    timer = 0;
+                    
+                }
+                
+            }
+            else 
+            {
+                if (facingdown)
+                {
+                    facingdown = false;
+                }
+                
+            }
+            if (Mathf.Abs(deviceX) > Threshold) {
 	            move = (int) Mathf.Sign(deviceX);
 	        }
 	    } else if (MovementActivator == MovementActivatorType.Touch) {
@@ -52,11 +93,15 @@ public class PlayerMovementEditor : Editor {
     private SerializedProperty _movementActivatorProperty;
     private SerializedProperty _speedProperty;
     private SerializedProperty _thresholdProperty;
+    private SerializedProperty _flashlight;
+    private SerializedProperty _text;
 
     void OnEnable() {
         _movementActivatorProperty = serializedObject.FindProperty("MovementActivator");
         _speedProperty = serializedObject.FindProperty("Speed");
         _thresholdProperty = serializedObject.FindProperty("Threshold");
+        _flashlight = serializedObject.FindProperty("Flashlight");
+        _text = serializedObject.FindProperty("Text");
     }
 
     public override void OnInspectorGUI() {
@@ -64,6 +109,8 @@ public class PlayerMovementEditor : Editor {
 
         EditorGUILayout.PropertyField(_movementActivatorProperty);
         EditorGUILayout.PropertyField(_speedProperty);
+        EditorGUILayout.PropertyField(_flashlight);
+        EditorGUILayout.PropertyField(_text);
 
         var type = (PlayerMovement.MovementActivatorType) _movementActivatorProperty.enumValueIndex;
         if (type == PlayerMovement.MovementActivatorType.HeadTilt) {
