@@ -1,24 +1,22 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
-public class GroundChanger : MonoBehaviour {
+public class RockFall : MonoBehaviour {
 
-    public GameObject ground;
+    public GameObject Rock;
 
 	// Use this for initialization
-	void Start ()
-    {
-
+	void Start () {
+		
 	}
-
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.CompareTag("Player"))
         {
-            ground.SetActive(true);
+            Rigidbody rigidRock = Rock.gameObject.GetComponent<Rigidbody>();
+            rigidRock.useGravity = true;
         }
     }
 }
